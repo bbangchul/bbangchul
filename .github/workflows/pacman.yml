@@ -13,15 +13,24 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
-      - name: Generate pacman contribution graph
-        uses: maurodesouza/pacman-contribution-graph@main
+      - name: Generate pacman graph (SVG)
+        uses: abozanona/pacman-contribution-graph@main
         with:
           github_user_name: ${{ github.repository_owner }}
 
-      - name: Push SVGs to output branch
+      # ✅ SVG -> PNG 변환 (깨짐 방지)
+      - name: Install converter
+        run: sudo apt-get update && sudo apt-get install -y librsvg2-bin
+
+      - name: Convert SVG to PNG
+        run: |
+          ls -la dist
+          rsvg-convert dist/pacman-contribution-graph.svg -o dist/pacman-contribution-graph.png
+
+      - name: Push to output branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
           target_branch: output
